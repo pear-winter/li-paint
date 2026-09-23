@@ -33,7 +33,7 @@ function validate(b){
 }
 function parse(raw){if(raw.length>100*1024*1024)throw Error('文件超过 100 MB，请分开迁移素材。');let b;try{b=JSON.parse(raw,(k,v)=>{if(['__proto__','constructor','prototype'].includes(k))fail();return v;});}catch{fail();}return validate(b);}
 function create(settings,profiles,options={}){
- const b={format:'pear-atelier-settings',version:1,appVersion:'1.0.2',createdAt:new Date().toISOString(),settings:Object.fromEntries(fields.map(k=>[k,clone(settings[k]??null)])),profiles:clone(profiles)};
+ const b={format:'pear-atelier-settings',version:1,appVersion:'1.0.3',createdAt:new Date().toISOString(),settings:Object.fromEntries(fields.map(k=>[k,clone(settings[k]??null)])),profiles:clone(profiles)};
  for(const p of b.profiles)if(!options.keys)delete p.key;
  if(options.vibes!==undefined)b.vibes=clone(options.vibes);
  if(options.assets!==undefined)b.assets=clone(options.assets);
