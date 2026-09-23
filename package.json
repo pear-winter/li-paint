@@ -1,0 +1,15 @@
+{
+  "name": "li-paint",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node --check dist/app.js && node --check dist/native-bridge.js && node --check dist/server/index.js",
+    "test": "npm run build && node tests/worker.mjs",
+    "deploy": "npm run build && npx wrangler deploy"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

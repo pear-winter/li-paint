@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import worker from '../dist/server/index.js';
+const req=(path,init)=>new Request('https://example.test'+path,init);
+assert.equal((await worker.fetch(req('/'))).status,200);
+assert.ok((await(await worker.fetch(req('/app.js'))).text()).includes('PearApp'));
+assert.equal((await worker.fetch(req('/nai/user/subscription'))).status,401);
+assert.equal((await worker.fetch(req('/nai/evil',{headers:{Authorization:'Bearer test'}}))).status,404);
+assert.equal((await worker.fetch(req('/nai/user/subscription',{headers:{Authorization:'Bearer test',Origin:'https://evil.test'}}))).status,403);
+let seen;
+globalThis.fetch=async(url,opts)=>{seen={url,opts};return Response.json({ok:true})};
+const r=await worker.fetch(req('/nai/ai/generate-image',{method:'POST',headers:{Authorization:'Bearer test'},body:'{"input":"garden"}'}));
+assert.equal(r.status,200);assert.equal(seen.url,'https://image.novelai.net/ai/generate-image');assert.equal(seen.opts.headers.Authorization,'Bearer test');assert.equal(seen.opts.redirect,'manual');
+globalThis.fetch=async()=>new Response(null,{status:302,headers:{Location:'https://other.test'}});
+assert.equal((await worker.fetch(req('/nai/user/subscription',{headers:{Authorization:'Bearer test'}}))).status,502);
+console.log('PASS: assets, fixed-origin relay, authorization, origin checks and redirect rejection');

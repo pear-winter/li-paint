@@ -1,0 +1,10 @@
+node_modules/
+.wrangler/
+android/build/
+*.p12
+*.jks
+*.keystore
+password.txt
+.env
+.env.*
+.dev.vars*
