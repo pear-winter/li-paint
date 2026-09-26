@@ -1,10 +1,7 @@
 node_modules/
-.wrangler/
 android/build/
+windows/web/
+windows/*.syso
+private-signing/
 *.p12
-*.jks
-*.keystore
 password.txt
-.env
-.env.*
-.dev.vars*

@@ -1,85 +1,53 @@
-# ♪ 梨梨画室
+# ♪ 梨梨画室 3.9.1
 
-独立 NovelAI 绘图工具，包含安卓 APK 与网页版。没有酒馆依赖，也没有酒馆正文标签捕获功能。
+同步梨梨的《♪ 梨梨画室 v3.9.1》脚本，包含独立 APK、网页、Windows EXE 与原生 SillyTavern 扩展。独立版保留绘图、元数据库、Vibe 库、图库、设置五页；酒馆扩展另外保留正文抓取、文生图配置和聊天插图按钮。
 
-## 安卓安装
+## 安卓
 
-[下载 1.1.0 APK](downloads/pear-atelier-1.1.0.apk)。GitHub 手机页面如展示文件信息，请选择下载原始文件。
+[下载 APK](downloads/pear-atelier-3.9.1.apk)。安卓 8 及以上，使用较新的 Android System WebView。
 
-安卓 8 及以上，需较新的 Android System WebView。已安装 1.0 的用户可直接覆盖安装；沿用同一签名。1.0.1 使用梨梨指定的人物图标。
+沿用原包名 net.pearatelier.app、原签名和原存储地址。直接覆盖安装，不卸载旧版。versionCode 6，版本 3.9.1。
 
-## 网页部署：Cloudflare Workers
+## Windows
 
-仓库已包含完整部署配置，网页本身没有 ChatGPT 登录逻辑。仓库上传完成不等于网站已经发布。
+Windows 安装文件为 `pear-atelier-3.9.1.exe`，由本次交付附件提供，也可按下方说明构建。Windows 10/11 x64，双击打开。需要 Microsoft Edge WebView2 Runtime。文件未做 Windows 商业代码签名。
 
-1. 登录自己的 Cloudflare 账号，进入 **Workers & Pages**，创建 Worker 并选择连接 GitHub 仓库。
-2. 授权 **pear-winter/li-paint**，选择分支 **main**。
-3. 项目名称填写 **li-paint**，根目录保留仓库根目录。
-4. 构建命令填 **npm run build**，部署命令填 **npx wrangler deploy**。
-5. 完成部署后打开 Cloudflare 显示的实际网址。后续向 main 推送修改可自动更新。
+画室设置与图库保存在 `%LOCALAPPDATA%/PearAtelier/WebView`，导出的图片/JSON 默认保存到用户目录 `Downloads/PearAtelier`。高 DPI 使用 PerMonitorV2；原生接口桥支持 HTTPS、取消请求及二进制图片响应。固定本地端口 17866，重复打开时会提示关闭旧窗口。
 
-不用在 Cloudflare 环境变量或 GitHub 仓库里填 NovelAI Key。打开画室后，每位使用者在「设置」中填写自己的接口与 Key。
+## 酒馆扩展
 
-也可通过 Pages 直接上传部署：将 dist/server/index.js 放到压缩包根目录并命名为 _worker.js，连同 dist 下的前端文件压缩，上传到 Pages。不要只上传前端文件，官网接口转发需要 _worker.js。
+SillyTavern 1.19 或更新版。通过「扩展 → 安装扩展」安装本仓库（私有仓库需要有权限的 Git 认证）。仓库根目录 manifest.json 是扩展清单。
 
-## 功能
+先关闭酒馆助手里旧的「梨梨画室」脚本，再启用本扩展，避免两个入口同时接管画室。不要删除旧画室数据。扩展继续使用 `extensionSettings.pear_nai_studio` 和原 scope 对应的 IndexedDB，保存的设置和本地图库继续读取。首次打开点原来的画室图标；不需要酒馆助手运行。
 
-绘图、元数据库、Vibe 库、图库、设置五页；提示词与参数保存、图生图、局部重绘、精确参考、PNG 元数据解析、Vibe 组导入导出、收藏与相册、按日期筛选及批量下载。内置黑白线框、黑底白框、白蓝、白红、白黄、白灰、白绿虚线及跟随酒馆主题。
+如果使用扩展 ZIP，解压后将 `lili-atelier-extension` 整个目录放入 `SillyTavern/public/scripts/extensions/third-party/`，确认目录下直接有 manifest.json，再刷新酒馆。
 
-图库、Vibe、设置与 Key 保存在当前设备的浏览器/应用存储。网页与 APK 不自动同步；卸载应用或清理站点数据会清除本地内容。网页官网请求通过此 Worker 转发到固定的 NovelAI 域名，不在服务器保存 Key；第三方接口由浏览器直接请求，需要接口允许跨域。
+## 网站更新
 
-PNG 若只含 Vibe 参数而没有嵌入编码或原图，无法仅凭参数还原 Vibe 素材。
+原网站：https://li-paint.pages.dev
 
-## 本地检查
+现有 Pages 项目为直接上传模式，推送 GitHub 不会自动部署。在 Cloudflare → Workers & Pages → li-paint → 创建新部署 → Production，上传 `li-paint-pages-3.9.1.zip`。继续用原网址，浏览器本地数据才会继续读取。
 
-需要 Node.js 22 或更新版本：
+ZIP 根目录包含 `_worker.js` 和前端文件。官网请求转发至固定 NovelAI 域名，第三方接口需要允许浏览器跨域。不要在仓库或 Cloudflare 环境变量中写个人 Key；每位用户在画室设置中填写自己的接口。
+
+## 数据与迁移
+
+APK、网页、EXE 和酒馆各自保存在本设备，彼此不自动同步。在「设置 → 全部设置 · 导入与导出」迁移设置；图库、收藏和相册不包含在设置备份中。包含 Key 的备份应自己保管。卸载、清除应用数据或清除网站数据会清除本地内容。
+
+## 构建
+
+`src/studio.js` 是上传脚本的原始内容；`scripts/sync-studio.py` 生成独立版和原生扩展，保留原界面及主题。
 
 ```sh
-npm run build
-npm run check
+npm ci
 npm test
+npm run check
 ```
 
-`dist/` 为前端源文件，`server/handler.js` 为接口转发与静态资源处理。构建生成 `dist/server/index.js`。
+Android：Java 17、Android SDK 35.0.0、ECJ 3.38.0，配置 `ANDROID_SDK_ROOT`、`ECJ_JAR`、`PEAR_SIGNING_DIR` 后执行 `python3 android/build-apk.py`。签名目录包含 release.p12 和 password.txt（alias pear）；签名文件不入仓库。
 
-## 安卓构建
-
-Java 17、Android SDK platform/build-tools 35.0.0、ECJ 3.38.0。配置 `ANDROID_SDK_ROOT`、`ECJ_JAR`、`PEAR_SIGNING_DIR`，执行 `python3 android/build-apk.py`。
-
-签名目录需包含 `release.p12`（别名 pear）与 `password.txt`。签名备份由梨梨单独保管，不上传仓库；更新 APK 必须继续使用同一签名。
+Windows：Go 1.24+，执行 `python3 windows/build.py`；可通过 GO 指定 Go 可执行文件。使用仓库内图标及 DPI 清单，构建 x64 EXE。
 
 ## 验证范围
 
-已完成独立界面初始化与模拟生图流程测试、接口转发路由/权限/重定向测试，以及 APK 签名校验。尚未完成真实账号付费生图或安卓实机全面测试。
-
-
-## 1.0.2 设置迁移与主题
-
-设置 → 全部设置 · 导入与导出：备份提示词、人物、参数、API 配置、点数记录、按钮与美化。可勾选包含 Key（默认不含）及 Vibe / 参考图（默认包含）。JSON 文件可在 APK 和网页之间互相导入；图库、收藏和相册不在设置备份中，导入不会删除它们。导入前检查格式并显示替换范围，确认后重新打开页面。未包含的 Key 只会保留同一 ID、网址与类型的本地 Key。
-
-黑白线框始终内置。新增“跟随酒馆主题”以及“导入酒馆主题配色”：同页面可读取 SmartTheme 变量，独立网页 / APK 需要导入酒馆导出的主题 JSON，无法实时读取其他应用。没有颜色时使用深灰回退。
-
-升级 APK 请覆盖安装 1.0.2，不要卸载。Pages 项目通过“创建新部署”上传新包，继续使用原网址，保留浏览器本地数据。
-
-
-## 1.0.3 主题更新
-
-移除两个内置粉色主题，加入白蓝、白红、白黄、白灰；保留黑白、白绿虚线和跟随酒馆。自存 CSS 保留。已选旧内置粉色的用户更新后回到黑白，可重新选择其他主题。APK 同签名覆盖安装；Pages 在原项目创建生产部署上传新版 ZIP。
-
-
-
-## 1.1.0 同步更新
-
-- 元数据库使用图片卡片，支持改名、标签、收藏、按图名查找和按标签筛选；勾选字段后复制或导入。
-- 导入元数据设置内置正负面为“不添加”，确认后进入绘图页。
-- 元数据 Vibe 只临时使用，不自动写入 Vibe 库。仅主动“保存为 Vibe 组”并确认后保存所有单个 Vibe 和组。
-- 修正模型别名识别和当前模型编码选择；V5 自动取消 Vibe。
-- 新增黑底白框与直角/圆角切换。绘图忙碌时，黑白按钮变灰，彩色按钮按主题色变浅。
-- 所有操作弹窗在可见屏幕居中，长内容内部滚动；通知提示避开屏幕顶部安全区。保持独立版设计，无酒馆正文标签功能。
-
-APK 1.1.0 使用原包名及原签名，versionCode 5。直接覆盖安装，不卸载旧版。
-网页使用原 Pages 项目创建 Production 部署，上传 `li-paint-pages-1.1.0.zip`。构建包包含根目录 `_worker.js` 和前端资源，无需粘贴代码。项目当前采用直接上传，GitHub 更新不会自动发布该 Pages 网站。
-
-本次验证：旧版 IndexedDB v2 升级并保留图库；设置备份往返；元数据库操作与导入跳转；Vibe 临时载入不写库；原始 PNG 模型与编码构造；Worker 固定域名转发检查；新旧 APK 签名相同。未进行真实付费生图和安卓实机全面测试。
-
-本地执行 `npm install` 后运行 `npm test`。测试中的 API 不联网。
+已验证旧 IndexedDB v2 升级保留图片、设置备份、元数据/Vibe 导入和页面切换、接口转发权限/重定向限制、桌面二进制响应与文件保存、新旧 APK 签名一致。Windows EXE 已交叉构建；尚未进行 Windows/Android 实机全面测试或真实付费生图。
