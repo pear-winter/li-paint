@@ -7,7 +7,7 @@ const {JSDOM}=require(process.env.PEAR_TEST_MODULES?process.env.PEAR_TEST_MODULE
  Object.assign(W,{indexedDB,structuredClone,TextDecoder,TextEncoder,Response,Blob,DecompressionStream,fetch:async()=>{throw Error('Network disabled');}});W.HTMLElement.prototype.scrollIntoView=function(){};
  W.localStorage.setItem('pear-atelier-state',JSON.stringify({pear_nai_studio:{scope:'migration-test',settings:{}}}));
  for(const p of ['dist/settings-backup.js','dist/themes.js'])W.eval(fs.readFileSync(p,'utf8'));
- W.eval(fs.readFileSync('dist/app.js','utf8').replace('W[OWNER]={dispose,open};','W[OWNER]={dispose,open};W.test={run,stopAll,inlineProfile,dbReady,dbOp,s,cfg,PARAMS,pages,normalizeMetadata,metadataVibes,buildRequest,importMetadataVibes,snapshotVibes,cancelAllVibes,updateMetadataEntry,showMetadata,applyCorners,dispose};'));
+ W.eval(fs.readFileSync('dist/app.js','utf8').replace('W[OWNER]={dispose,open};','W[OWNER]={dispose,open};W.test={run,stopAll,inlineProfile,enterStudio,savePromptAsPair,dbReady,dbOp,s,cfg,PARAMS,pages,normalizeMetadata,metadataVibes,buildRequest,importMetadataVibes,snapshotVibes,cancelAllVibes,updateMetadataEntry,showMetadata,applyCorners,dispose};'));
  const t=W.test;await t.dbReady;assert.equal((await t.dbOp('images','get','retained')).id,'retained');assert(t.pages['元数据库']);assert(!t.pages['文生图配置']);
  const fixture={Source:'NovelAI Diffusion V4.5 4BDE2A90',Comment:JSON.stringify({prompt:'garden',reference_image_multiple:['YWJjZA=='],reference_strength_multiple:[.6],reference_information_extracted_multiple:[1],model_name:'NovelAI Diffusion V4.5'})};
  const metadata=t.normalizeMetadata(fixture),v=t.metadataVibes(fixture);assert.equal(metadata.settings.model,'nai-diffusion-4-5-full');assert.equal(v.items.length,1);v.items[0].selected=true;const req=t.buildRequest({...t.PARAMS,...metadata.settings},metadata,{positive:'',negative:''},v.items,true);assert.equal(req.parameters.reference_image_multiple[0],'YWJjZA==');
@@ -20,5 +20,15 @@ const {JSDOM}=require(process.env.PEAR_TEST_MODULES?process.env.PEAR_TEST_MODULE
  const order=[];let release;const gate=new Promise(r=>release=r);const first=t.run(async()=>{order.push('first');await gate;order.push('first-end');});const second=t.run(async()=>{order.push('second');});await new Promise(r=>setTimeout(r,0));assert.deepEqual(order,['first']);release();await Promise.all([first,second]);assert.deepEqual(order,['first','first-end','second']);
  let finish;const blocking=t.run(()=>new Promise(r=>finish=r));const skipped=t.run(()=>{throw Error('Cancelled queued task executed');}).catch(e=>e.name);await new Promise(r=>setTimeout(r,0));t.stopAll();finish();await blocking;assert.equal(await skipped,'AbortError');await t.run(async()=>order.push('recovered'));assert.equal(order.at(-1),'recovered');assert(t.inlineProfile('v5')!==t.inlineProfile('v45'));
  console.log('PASS generation queue order, cancellation/recovery, separate inline profiles');
+ const before=t.s.pairs.length;
+ const imported={id:'prompt-import',image:'data:image/png;base64,iVBORw0KGgo=',meta:{settings:{...t.PARAMS},scene:{prompt:'garden',negative:'rain',characters:[]},pair:{positive:'soft light',negative:'blur'}},request:{parameters:{seed:123}}};
+ await t.dbOp('images','put',imported);await t.enterStudio(imported.id);
+ assert.equal(t.s.pairs.length,before);assert.equal(t.cfg.pair,'none');assert(t.cfg.prompt.includes('soft light'));assert(t.cfg.prompt.includes('garden'));assert(t.cfg.negative.includes('blur'));assert.equal(t.cfg.seed,123);
+ t.s.pairs.push({id:'saved-light',name:'光线',positive:'soft light',negative:'blur'});
+ await t.enterStudio(imported.id);assert.equal(t.cfg.pair,'saved-light');assert.equal(t.cfg.prompt,'garden');assert.equal(t.cfg.negative,'rain');
+ t.savePromptAsPair(t.cfg);let dialog=[...shadow.querySelectorAll('.dialog')].at(-1);dialog.querySelector('input[type=text]').value='花园';dialog.querySelector('input[type=checkbox]').checked=true;[...dialog.querySelectorAll('button')].find(x=>x.textContent==='保存').click();
+ const pair=t.s.pairs.find(x=>x.name==='花园');assert(pair);assert.equal(pair.positive,'garden');assert.equal(pair.negative,'rain');assert.equal(t.cfg.pair,pair.id);assert.equal(t.cfg.prompt,'');assert.equal(t.cfg.negative,'');assert.equal(JSON.parse(W.localStorage.getItem('pear-atelier-state')).pear_nai_studio.studio2.draw.pair,pair.id);
+ console.log('PASS 3.11.1: unsaved image prompts stay inline, saved pairs reused, save-and-apply persists without duplicate prompts');
+
  t.dispose();dom.window.close();console.log('PASS standalone: startup, v2 migration, Vibe models, no automatic library writes, V5 cancellation, metadata edits/import/navigation, corners, original PNG fixtures');
 })().catch(e=>{console.error(e);process.exit(1)});

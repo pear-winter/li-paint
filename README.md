@@ -1,27 +1,28 @@
-# ♪ 梨梨画室 3.11.0
+# ♪ 梨梨画室 3.11.1
 
-同步梨梨的《♪ 梨梨画室 v3.11.0》脚本，包含独立 APK、网页、Windows EXE 与原生 SillyTavern 扩展。独立版保留绘图、元数据库、Vibe 库、图库、设置五页；酒馆扩展另外保留正文抓取、文生图配置和聊天插图按钮。
+同步梨梨的《♪ 梨梨画室 v3.11.1》脚本，包含独立 APK、网页、Windows EXE 与原生 SillyTavern 扩展。独立版保留绘图、元数据库、Vibe 库、图库、设置五页；酒馆扩展另外保留正文抓取、文生图配置和聊天插图按钮。
 
-## 3.11.0 扩展更新
+## 3.11.1 更新
 
-- 生图请求排队依次执行；停止会取消当前请求和待执行任务。
-- 正文生图拆分 4.5 / V5 配置；正文图片支持编辑 Tag、切换方向/模型重绘及进入画室。
-- 重绘按钮显示等待与排队状态，图库提取参数移到大图中。
-- 沿用原设置和图库，保留上传脚本的 UI 与业务逻辑。
+- 同步上传的 v3.11.1 脚本，GitHub 扩展、独立网页和 Android APK 使用同一版功能。
+- 生图内容可命名保存为内置提示词，可同时选用并清空原生图内容，避免重复叠加。
+- 图片进入画室、局部重绘或提取参数时复用已有内置词；未保存的原图内置词并回提示词，不再自动创建新条目。
+- 沿用 3.11.0 的生图排队、停止清空队列、4.5 / V5 正文配置及重绘操作。
+- 独立版保留五页，不显示酒馆文生图配置；保留原设置键名和 IndexedDB 存储。
 
-本次更新 GitHub 扩展、源码与网页构建产物；下列 APK / EXE 仍为此前的 3.9.1，不代表已重新打包。Cloudflare 线上网站没有在本次发布。
+已重新打包同签名 APK 和 Cloudflare Pages ZIP。线上网站由用户上传 ZIP 更新；Windows EXE 本次未重新打包，仍为旧版。
 
-已检查语法、旧图库读取、Vibe/元数据、排队顺序与取消恢复。未调用真实付费生图接口。
+已通过语法、旧图库读取、设置备份、Vibe/元数据、排队顺序与停止恢复，以及提示词保存和复用测试。未调用真实付费生图接口，未进行 Android 实机测试。
 
 ## 安卓
 
-[下载 APK](downloads/pear-atelier-3.9.1.apk)。安卓 8 及以上，使用较新的 Android System WebView。
+[下载 APK](downloads/pear-atelier-3.11.1.apk)。安卓 8 及以上，使用较新的 Android System WebView。
 
-沿用原包名 net.pearatelier.app、原签名和原存储地址。直接覆盖安装，不卸载旧版。versionCode 6，版本 3.9.1。
+沿用原包名 net.pearatelier.app、原签名和原存储地址。直接覆盖安装，不卸载旧版。versionCode 7，版本 3.11.1。
 
 ## Windows
 
-Windows 安装文件为 `pear-atelier-3.9.1.exe`，由本次交付附件提供，也可按下方说明构建。Windows 10/11 x64，双击打开。需要 Microsoft Edge WebView2 Runtime。文件未做 Windows 商业代码签名。
+Windows 安装文件为 `pear-atelier-3.9.1.exe`，由此前交付附件提供，也可按下方说明构建。Windows 10/11 x64，双击打开。需要 Microsoft Edge WebView2 Runtime。文件未做 Windows 商业代码签名。
 
 画室设置与图库保存在 `%LOCALAPPDATA%/PearAtelier/WebView`，导出的图片/JSON 默认保存到用户目录 `Downloads/PearAtelier`。高 DPI 使用 PerMonitorV2；原生接口桥支持 HTTPS、取消请求及二进制图片响应。固定本地端口 17866，重复打开时会提示关闭旧窗口。
 
@@ -37,7 +38,7 @@ SillyTavern 1.19 或更新版。通过「扩展 → 安装扩展」粘贴 https:
 
 原网站：https://li-paint.pages.dev
 
-现有 Pages 项目为直接上传模式，推送 GitHub 不会自动部署。在 Cloudflare → Workers & Pages → li-paint → 创建新部署 → Production，上传 `li-paint-pages-3.9.1.zip`。继续用原网址，浏览器本地数据才会继续读取。
+现有 Pages 项目为直接上传模式，推送 GitHub 不会自动部署。在 Cloudflare → Workers & Pages → li-paint → 创建新部署 → Production，上传 [li-paint-pages-3.11.1.zip](downloads/li-paint-pages-3.11.1.zip)。继续用原网址，浏览器本地数据才会继续读取。
 
 ZIP 根目录包含 `_worker.js` 和前端文件。官网请求转发至固定 NovelAI 域名，第三方接口需要允许浏览器跨域。不要在仓库或 Cloudflare 环境变量中写个人 Key；每位用户在画室设置中填写自己的接口。
 
@@ -53,12 +54,13 @@ APK、网页、EXE 和酒馆各自保存在本设备，彼此不自动同步。�
 npm ci
 npm test
 npm run check
+python3 scripts/package-pages.py
 ```
 
 Android：Java 17、Android SDK 35.0.0、ECJ 3.38.0，配置 `ANDROID_SDK_ROOT`、`ECJ_JAR`、`PEAR_SIGNING_DIR` 后执行 `python3 android/build-apk.py`。签名目录包含 release.p12 和 password.txt（alias pear）；签名文件不入仓库。
 
 Windows：Go 1.24+，执行 `python3 windows/build.py`；可通过 GO 指定 Go 可执行文件。使用仓库内图标及 DPI 清单，构建 x64 EXE。
 
-## 验证范围
+## 历史验证范围
 
 已验证旧 IndexedDB v2 升级保留图片、设置备份、元数据/Vibe 导入和页面切换、接口转发权限/重定向限制、桌面二进制响应与文件保存、新旧 APK 签名一致。Windows EXE 已交叉构建；尚未进行 Windows/Android 实机全面测试或真实付费生图。
