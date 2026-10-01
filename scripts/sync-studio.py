@@ -32,12 +32,24 @@ start=s.index("on('GENERATION_STARTED'");end=s.index('\nconst resize=',start)
 s=s[:start]+"const observer={disconnect(){}};\n"+s[end:]
 s=once(s,"async function pruneDeletedCurrent(){", "async function pruneDeletedCurrent(){return;}\nasync function unusedPruneDeletedCurrent(){")
 s=once(s,"图库及对应正文插图会同步删除，其他聊天下次打开时同步。", "将删除当前画室图库中的所选图片。")
-s=once(s,"b('收起',()=>shell.hidden=true)", "b('绘图',()=>page('绘图'))")
-s=once(s,"else shell.hidden=true;", "else page('绘图');")
+s=once(s,"b('收起',()=>closeShell())", "b('绘图',()=>closeShell())")
+# Keep the new parameter-save prompt, but standalone must remain open.
+start=s.index('function closeShell(){');end=s.index('\nfunction sync(){',start)
+s=s[:start]+s[start:end].replace('shell.hidden=true;',"page('绘图');")+s[end:]
+# The standalone app has no current Tavern API. Only user-configured providers apply.
+s=once(s,"const next={...subDefaults(),...v};", "const next={...subDefaults(),...v,mode:'custom'};")
+s=once(s,"Object.assign(e('option','酒馆当前 API'),{value:'__tavern'}),", "")
+s=once(s,"prov.value=p?p.id:'__tavern';", "prov.value=p?p.id:'__new';")
+s=once(s,"row(b('测试连接',act(testConn)),b('一键使用酒馆 API',act(async()=>{subState().mode='tavern';await persist();refreshSubApi();await testConn();})))", "row(b('测试连接',act(testConn)))")
+s=once(s,"if(!st.active)st.mode='tavern';", "if(!st.active)st.mode='custom';")
+s=once(s,"return st.mode==='tavern'||!p?'酒馆当前 API':p.name+' · '+p.model;", "return !p?'未配置服务商':p.name+' · '+p.model;")
+s=once(s,"r=await W.fetch(subUrl(c.url,", "r=await W.pearFetch(subUrl(c.url,")
+s=once(s,"r=await W.fetch(subUrl(url.value,", "r=await W.pearFetch(subUrl(url.value,")
+s=once(s,"buildSubApiSettings(subApiBox);", "buildSubApiSettings(subApiBox);note(subApiBox,'网页版请配置允许浏览器跨域访问的 HTTPS 副 API；配置和译文保存在当前设备。');")
 s=once(s,"W[OWNER]={dispose,open};", """function applyTavernColors(){for(const [key,value]of Object.entries(s.ui.tavernColors||{})){if(/^--SmartTheme[A-Za-z]+Color$/.test(key)&&typeof value==='string'&&W.CSS?.supports('color',value))host.style.setProperty(key,value);}}
 applyTavernColors();
 const standaloneStyle=e('style');standaloneStyle.textContent='.shell{inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border:0!important}.fab{display:none!important}';root.append(standaloneStyle);
-W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'3.11.1',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
+W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'3.16.4',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
 s=s.replace('独立酒馆助手脚本 · SillyTavern 1.19 / 酒馆助手 4.10','独立画室 · 网页 / Android / Windows')
 (root/'dist/app.js').write_text(s)
-print('Generated studio 3.11.1: standalone and native extension')
+print('Generated studio 3.16.4: standalone and native extension')
