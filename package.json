@@ -1,12 +1,12 @@
 {
   "name": "li-paint",
-  "version": "3.16.4",
+  "version": "3.17.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "python3 scripts/sync-studio.py && node build.mjs",
-    "check": "node --check dist/app.js && node --check dist/native-bridge.js && node --check dist/server/index.js && node --check extension/studio.js && node --check extension/index.js",
-    "test": "npm run build && node tests/worker.mjs && node tests/settings-backup.mjs && node tests/app.cjs",
+    "check": "node --check dist/app.js && node --check dist/native-bridge.js && node --check dist/server/index.js && node --check extension/studio.js && node --check extension/index.js && node --check extension/compat.js",
+    "test": "npm run build && node tests/worker.mjs && node tests/settings-backup.mjs && node tests/app.cjs && node tests/compat.mjs",
     "deploy": "npm run build && npx wrangler deploy",
     "test:app": "node tests/app.cjs"
   },

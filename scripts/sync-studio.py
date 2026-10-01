@@ -5,9 +5,18 @@ source=(root/'src/studio.js').read_text()
 def once(s,a,b):
  if s.count(a)!=1:raise ValueError('Source changed, inspect adapter: '+a[:100])
  return s.replace(a,b,1)
+import runpy
+source=runpy.run_path(str(root/'scripts/runtime-patches.py'))['patch_runtime'](source,once)
 # Native extension: shared UI, settings namespace and database, no Tavern Helper required.
-ext=once(source,'(function startAtelier(){','export function startAtelier(){')
+ext=once(source,'(function startAtelier(){','export function startAtelier(getContext,uploadImage){')
 ext=once(ext,'const W=window.parent||window,','const W=window,')
+ext=once(ext,'const ctx=()=>W.SillyTavern?.getContext();if(!ctx())return;','const ctx=getContext;if(!ctx())return;')
+# Use the host's image helper: endpoints and payloads changed between releases.
+a=ext.index("const response=await W.fetch('/api/images/upload'")
+z=ext.index('if(!validSource(src))return;',a)
+ext=ext[:a]+"const result=await uploadImage(item,controller.signal);"+ext[z:]
+ext=once(ext,'cleanup.push(()=>ctx().eventSource.removeListener(event,fn));', 'cleanup.push(()=>{const bus=ctx().eventSource;const off=bus?.removeListener||bus?.off;off?.call(bus,event,fn);});')
+ext=once(ext,"let hostIsGenerating=null;import('/script.js')","let hostIsGenerating=null;import(new URL('script.js',D.baseURI).href)")
 ext=ext.removesuffix('\n')
 assert ext.endswith('})();')
 ext=ext[:-5]+'}\n'
@@ -49,7 +58,7 @@ s=once(s,"buildSubApiSettings(subApiBox);", "buildSubApiSettings(subApiBox);note
 s=once(s,"W[OWNER]={dispose,open};", """function applyTavernColors(){for(const [key,value]of Object.entries(s.ui.tavernColors||{})){if(/^--SmartTheme[A-Za-z]+Color$/.test(key)&&typeof value==='string'&&W.CSS?.supports('color',value))host.style.setProperty(key,value);}}
 applyTavernColors();
 const standaloneStyle=e('style');standaloneStyle.textContent='.shell{inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border:0!important}.fab{display:none!important}';root.append(standaloneStyle);
-W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'3.16.4',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
+W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'3.17.0',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
 s=s.replace('独立酒馆助手脚本 · SillyTavern 1.19 / 酒馆助手 4.10','独立画室 · 网页 / Android / Windows')
 (root/'dist/app.js').write_text(s)
-print('Generated studio 3.16.4: standalone and native extension')
+print('Generated studio 3.17.0: standalone and native extension')
