@@ -24,7 +24,7 @@ ext=ext[:-5]+'}\n'
 # Standalone uses the existing origin, settings key and IndexedDB scope.
 s=once(source,"const W=window.parent||window,D=W.document,OWNER='__pear_nai_studio_v1';", "const W=window,D=W.document,OWNER='__pear_atelier_app';")
 s=once(s,'const ctx=()=>W.SillyTavern?.getContext();if(!ctx())return;',"let appState={};try{appState=JSON.parse(W.localStorage.getItem('pear-atelier-state')||'{}');}catch{}\nconst ctx=()=>({extensionSettings:appState,chat:[]});")
-s=once(s,'function save(){ctx().saveSettingsDebounced?.();}',"function save(){W.localStorage.setItem('pear-atelier-state',JSON.stringify(appState));}")
+s=once(s,'function save(){ctx().saveSettingsDebounced?.();scheduleTokens();}',"function save(){W.localStorage.setItem('pear-atelier-state',JSON.stringify(appState));scheduleTokens();}")
 s=s.replace("['绘图','文生图配置','元数据库','Vibe 库','图库','设置']","['绘图','元数据库','Vibe 库','图库','设置']")
 s='\n'.join(l for l in s.splitlines() if not l.startswith(("box=section(pages['文生图配置']", "{const pg=pages['文生图配置'];")))+'\n'
 s=once(s,"let area=section(pages['设置'],'正文图片与按钮',true);", "let area; if(false){area=section(pages['设置'],'正文图片与按钮',true);")
@@ -55,10 +55,11 @@ s=once(s,"return st.mode==='tavern'||!p?'酒馆当前 API':p.name+' · '+p.model
 s=once(s,"r=await W.fetch(subUrl(c.url,", "r=await W.pearFetch(subUrl(c.url,")
 s=once(s,"r=await W.fetch(subUrl(url.value,", "r=await W.pearFetch(subUrl(url.value,")
 s=once(s,"buildSubApiSettings(subApiBox);", "buildSubApiSettings(subApiBox);note(subApiBox,'网页版请配置允许浏览器跨域访问的 HTTPS 副 API；配置和译文保存在当前设备。');")
+start=s.index('W[OWNER]={dispose,open,inline:{');end=s.index(";window.addEventListener('pagehide'",start);s=s[:start]+'W[OWNER]={dispose,open}'+s[end:]
 s=once(s,"W[OWNER]={dispose,open};", """function applyTavernColors(){for(const [key,value]of Object.entries(s.ui.tavernColors||{})){if(/^--SmartTheme[A-Za-z]+Color$/.test(key)&&typeof value==='string'&&W.CSS?.supports('color',value))host.style.setProperty(key,value);}}
 applyTavernColors();
 const standaloneStyle=e('style');standaloneStyle.textContent='.shell{inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border:0!important}.fab{display:none!important}';root.append(standaloneStyle);
-W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'3.17.0',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
+W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'4.0.1',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
 s=s.replace('独立酒馆助手脚本 · SillyTavern 1.19 / 酒馆助手 4.10','独立画室 · 网页 / Android / Windows')
 (root/'dist/app.js').write_text(s)
-print('Generated studio 3.17.0: standalone and native extension')
+print('Generated studio 4.0.1: standalone and native extension')

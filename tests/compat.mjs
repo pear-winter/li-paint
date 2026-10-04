@@ -20,7 +20,7 @@ for (const version of ['1.10.0','1.12.0','1.19.0']) {
  W.SillyTavern={getContext:()=>raw};const read=makeContextReader(W,core,{extension_settings:settings});
  assert.equal(read().extensionSettings,settings);assert.equal(read().getRequestHeaders()['X-CSRF-Token'],'test');chatId='second';assert.equal(read().getCurrentChatId(),'second');
  await read().saveChat();assert.equal(chatSaves,1);
- const source=fs.readFileSync('extension/studio.js','utf8').replace('export function startAtelier','function startAtelier').replace('W[OWNER]={dispose,open};','W[OWNER]={dispose,open};W.testReady=dbReady;');
+ const source=fs.readFileSync('extension/studio.js','utf8').replace('export function startAtelier','function startAtelier').replace('W[OWNER]={dispose,open,inline:{','W.testReady=dbReady;W[OWNER]={dispose,open,inline:{');
  W.eval(source);W.startAtelier(read,async()=>({path:'/user/images/test.png'}));await W.testReady;
  assert(W.__pear_nai_studio_v1);assert(settingsSaves>0);assert(settings.pear_nai_studio.studio2);assert(W.document.querySelector('#pear-nai-host').shadowRoot.textContent.includes('副 API'));
  W.__pear_nai_studio_v1.dispose();assert.equal(events.listenerCount('chat_changed'),0);dom.window.close();

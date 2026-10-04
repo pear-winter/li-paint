@@ -1,25 +1,26 @@
-# ♪ 梨梨画室 3.17.0
+# ♪ 梨梨画室 4.0.1
 
-同步梨梨的《♪ 梨梨画室 v3.17.0》脚本，包含独立 APK、网页、Windows EXE 与原生 SillyTavern 扩展。独立版保留绘图、元数据库、Vibe 库、图库、设置五页；酒馆扩展另外保留正文抓取、文生图配置和聊天插图按钮。
+同步梨梨的《♪ 梨梨画室 v4.0.1》脚本，包含独立 APK、网页、Windows EXE 与原生 SillyTavern 扩展。独立版保留绘图、元数据库、Vibe 库、图库、设置五页；酒馆扩展另外保留正文抓取、文生图配置和聊天插图按钮。
 
-## 3.17.0 更新
+## 4.0.1 更新
 
-- 同步新脚本：绘画进度条、已用时间、预计剩余时间、排队数量。进度按相似任务历史耗时估算，不是服务端真实采样步数。
-- 停止或失败显示「未完成」，不再被残留刷新改成完成；关闭画室扩展时清理进度计时器。
-- 原生酒馆扩展增加兼容层，最低版本从 1.19 下调至 1.10；补齐旧版上下文缺少的设置、保存和聊天标识接口。
-- 正文图片交由当前酒馆的 saveBase64AsFile 保存，适配旧 /uploadimage、新 /api/images/upload，以及 data URL / 裸 base64 的格式差异。
-- 兼容没有 APP_READY 事件、事件已经触发、禁用再启用等启动场景；非 HTTPS 的本地酒馆提供安全随机 UUID 回退。
-- 保留 3.16.4 的画师串参数、种子手动应用、副 API 中文翻译和五页独立网页。
+- 同步 4.0.1 脚本到独立网页、安卓 APK 和原生酒馆扩展；小剧场导出接口保持不变。
+- 图片按原比例放大；主题音符滑块、花体 Fold / Ratio / Seed。种子单击复制、双击使用。
+- 生图与停止键常驻绘图页底部；生图内容仅折叠标题黑底，输入区白底线框并加高。
+- 顶部 Token 随当前正负面编辑切换；点击看内置词、场景与人物的分项及总和。内置词可独立编辑参数。
+- Token 为本地 T5 参考值，不保证与官网有效 token 数一致。V4/4.5 显示上限 512，V5 显示 1471。
+- 图库使用持久轻量索引、32 张分页、当前页缩略图加载和加载动效；旧图库首次打开会建立索引。
+- 保留原包名、Android 本地地址、网页网址、设置和数据库 scope；APK 使用原签名。
 
-本次交付网站 ZIP，上传到原 Cloudflare Pages 项目后上线。APK 仍为 3.11.1，Windows EXE 仍为 3.9.1，本次未重新打包。
+网站 ZIP 为原 Cloudflare Pages 项目的手动上传包，GitHub 推送不会自动上线。Windows EXE 沿用 3.9.1，此次未重打包。
 
-已通过语法和模拟测试：旧图库/设置、Vibe/元数据、生图排队、画师串/种子/翻译、进度成功/失败/停止清理，以及 1.10.0、1.12.0、1.19.0 的上下文启动与原始图片上传函数。未启动这些版本的完整酒馆服务器或调用付费生图/翻译接口；其他旧版分支仍可能需要具体适配。请使用较新的浏览器（PNG/ZIP 解压需要 DecompressionStream）。
+通过语法、备份/接口、旧图库迁移、模拟生图队列/停止、主题、元数据/Vibe 和旧酒馆上下文测试；另做了手机宽度的独立网页与脚本交互检查。APK 已完成签名和包名/版本验证。尚未进行 Android 真机或付费生图测试。
 
 ## 安卓
 
-[下载 APK](downloads/pear-atelier-3.11.1.apk)。安卓 8 及以上，使用较新的 Android System WebView。
+[下载 APK](downloads/pear-atelier-4.0.1.apk)。安卓 8 及以上，使用较新的 Android System WebView。
 
-沿用原包名 net.pearatelier.app、原签名和原存储地址。直接覆盖安装，不卸载旧版。versionCode 7，版本 3.11.1。
+沿用原包名 net.pearatelier.app、原签名和原存储地址。直接覆盖安装，不卸载旧版。versionCode 8，版本 4.0.1。
 
 ## Windows
 
@@ -39,7 +40,7 @@ SillyTavern 1.10 或更新版（已对 1.10.0 / 1.12.0 / 1.19.0 接口做兼容�
 
 原网站：https://li-paint.pages.dev
 
-现有 Pages 项目为直接上传模式，推送 GitHub 不会自动部署。在 Cloudflare → Workers & Pages → li-paint → 创建新部署 → Production，上传 [li-paint-pages-3.17.0.zip](downloads/li-paint-pages-3.17.0.zip)。继续用原网址，浏览器本地数据才会继续读取。
+现有 Pages 项目为直接上传模式，推送 GitHub 不会自动部署。在 Cloudflare → Workers & Pages → li-paint → 创建新部署 → Production，上传 [li-paint-pages-4.0.1.zip](downloads/li-paint-pages-4.0.1.zip)。继续用原网址，浏览器本地数据才会继续读取。
 
 ZIP 根目录包含 `_worker.js` 和前端文件。官网请求转发至固定 NovelAI 域名，第三方接口需要允许浏览器跨域。不要在仓库或 Cloudflare 环境变量中写个人 Key；每位用户在画室设置中填写自己的接口。副 API 同样需要允许浏览器跨域的 HTTPS 地址；其凭证保存在本设备 IndexedDB，当前脚本的全部设置备份不包含副 API 配置。
 

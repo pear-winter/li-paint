@@ -33,23 +33,23 @@ const {JSDOM}=require(process.env.PEAR_TEST_MODULES?process.env.PEAR_TEST_MODULE
  console.log('PASS 3.11.1: unsaved image prompts stay inline, saved pairs reused, save-and-apply persists without duplicate prompts');
 
 
- assert.equal(W.PearApp.version,'3.17.0');
+ assert.equal(W.PearApp.version,'4.0.1');
  assert(!t.pages['设置'].textContent.includes('酒馆当前 API'));assert(!t.pages['设置'].textContent.includes('一键使用酒馆 API'));
  assert.equal(pair.params.model,t.cfg.model);t.applyPairParams(t.cfg,{params:{steps:32,scale:6}});assert.equal(t.cfg.steps,32);
  t.markPairBaseline();t.cfg.steps=33;t.closeShell();dialog=[...shadow.querySelectorAll('.dialog')].at(-1);assert(dialog.textContent.includes('参数有改动'));[...dialog.querySelectorAll('button')].find(x=>x.textContent==='存进当前画师串').click();assert.equal(pair.params.steps,33);assert.equal(shadow.querySelector('.shell').hidden,false);
  t.cfg.width=832;t.cfg.height=1216;t.shapeBtn.click();assert.equal(t.cfg.width,1216);assert.equal(t.cfg.height,832);t.shapeBtn.click();assert.equal(t.cfg.width,t.cfg.height);
- t.seedBox.value='567';[...shadow.querySelectorAll('button')].find(x=>x.textContent==='应用种子').click();assert.equal(t.cfg.seed,567);
+ t.seedBox.value='567';t.seedBox.dispatchEvent(new W.MouseEvent('dblclick',{bubbles:true}));assert.equal(t.cfg.seed,567);
  await t.subLoad();const st=t.subState();Object.assign(st,{mode:'custom',active:'provider',activeModel:'second',profiles:[{id:'provider',name:'模拟服务商',url:'https://api.test/v1',key:'test-only',models:['first','second']}]});
  const calls=[];W.pearFetch=async(url,options)=>{calls.push({url,body:JSON.parse(options.body)});return Response.json({choices:[{message:{content:calls.length===1?'### 正面\n花园':'女孩'}}]});};
  const zh=await t.translateScene('### 正面\ngarden\n\n### 人物1\n1girl');assert.equal(zh,'【正面】\n花园\n\n【人物1】\n女孩');assert.equal(calls.length,2);assert.equal(calls[0].url,'https://api.test/v1/chat/completions');assert.equal(calls[0].body.model,'second');
  assert.equal(t.allTags({prompt:'garden， light',characters:[{prompt:'1girl'},{prompt:'hidden',enabled:false}]}),'garden, light, 1girl');
  await t.dbOp('vault','put',{id:'zh-test',kind:'zh',src:'garden',text:'花园'});const holder=W.document.createElement('div');shadow.append(holder);t.translateBox(holder,()=> 'garden','zh-test');await new Promise(r=>setTimeout(r,20));assert(holder.textContent.includes('花园'));
- console.log('PASS 3.17.0: artist parameters/save confirmation, shape/seed controls, custom provider selection, translation fallback, stored translations');
+ console.log('PASS 4.0.1: artist parameters/save confirmation, shape/seed controls, custom provider selection, translation fallback, stored translations');
 
  const progressReq={model:'nai-diffusion-5-full',parameters:{width:832,height:1216,steps:28}};
  t.startProgress(progressReq);let bar=shadow.querySelector('.gen-progress');assert.equal(bar.hidden,false);assert(bar.textContent.includes('估算'));assert(bar.textContent.includes('预计'));t.genProgress().start-=1000;t.endProgress(true);assert(bar.textContent.includes('完成'));assert.equal(bar.querySelector('.gen-progress-fill').style.width,'100%');assert(t.s.ui.genTimes[t.progressKey(progressReq)]>=1000);
  t.startProgress(progressReq);t.endProgress(false);assert(bar.textContent.includes('未完成'));assert.equal(bar.querySelector('.gen-progress-fill').style.width,'0%');assert.equal(t.genProgress().raf,0);assert.equal(t.genProgress().timer,0);
  t.startProgress(progressReq);t.stopAll();assert.equal(t.genProgress().active,false);assert(bar.textContent.includes('未完成'));t.startProgress(progressReq);
- console.log('PASS 3.17.0 progress: estimates, completion, failure/stop and timer cleanup');
+ console.log('PASS 4.0.1 progress: estimates, completion, failure/stop and timer cleanup');
  t.dispose();assert.equal(t.genProgress().active,false);assert.equal(t.genProgress().raf,0);dom.window.close();console.log('PASS standalone: startup, v2 migration, Vibe models, no automatic library writes, V5 cancellation, metadata edits/import/navigation, corners, original PNG fixtures');
 })().catch(e=>{console.error(e);process.exit(1)});
