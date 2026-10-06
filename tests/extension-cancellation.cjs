@@ -1,0 +1,17 @@
+const fs=require('fs'),assert=require('assert/strict');
+const {JSDOM}=require('jsdom'),{indexedDB}=require('fake-indexeddb');
+(async()=>{
+const dom=new JSDOM('<body><div id="top-settings-holder"></div><div id="extensionsMenu"></div><div class="mes" mesid="0"><div class="mes_text"></div></div></body>',{url:'https://tavern.test',runScripts:'outside-only',pretendToBeVisual:true});const W=dom.window;
+Object.assign(W,{indexedDB,structuredClone,TextDecoder,TextEncoder,Response,Blob,DecompressionStream});W.HTMLElement.prototype.scrollIntoView=function(){};
+const query=W.Element.prototype.querySelector;W.Element.prototype.querySelector=function(x){if(x===':scope>summary')return [...this.children].find(y=>y.tagName==='SUMMARY')||null;return query.call(this,x);};
+const message='image###cat, flowers###',context={extensionSettings:{},chat:[{mes:message,is_user:false}],characterId:0,getCurrentChatId:()=> 'test',saveChat:async()=>{},saveSettingsDebounced:()=>{},getRequestHeaders:()=>({})};W.SillyTavern={getContext:()=>context};W.document.querySelector('.mes_text').textContent=message;
+let code=fs.readFileSync('extension/studio.js','utf8').replace('export function startAtelier','function startAtelier')+';startAtelier(()=>window.SillyTavern.getContext(),async()=>({path:"/user/images/test.png"}));';code=code.replace('W[OWNER]={dispose,open,inline:{','W.test={run,stopAll,dbReady,dbOp,generateDrawing,renderMessageButtons,sendGeneration,generateButton,cfg,s,genProgress,checkTask,awaitTask,upscaleItem,getCounts:()=>({taskCount,waitCount,busy})};W[OWNER]={dispose,open,inline:{');W.eval(code);const t=W.test;assert(t);await t.dbReady;
+await t.dbOp('vault','put',{id:'test',kind:'api',name:'test',type:'third',url:'https://test.invalid',key:'mock-only'});
+// Reload the script so API profiles are loaded from IndexedDB.
+W.__pear_nai_studio_v1.dispose();W.eval(code);const u=W.test;await u.dbReady;u.s.activeApi='test';u.cfg.prompt='cat';u.cfg.count=1;
+const tick=()=>new Promise(r=>setTimeout(r,10));
+W.fetch=()=>new Promise(()=>{});u.generateButton.click();await tick();assert.equal(u.generateButton.getAttribute('aria-busy'),'true');u.stopAll();await tick();assert.equal(u.generateButton.getAttribute('aria-busy'),'false');assert.equal(u.getCounts().taskCount,0);assert.equal(u.getCounts().waitCount,0);assert.equal(u.genProgress().active,false);
+u.renderMessageButtons();assert(W.document.querySelector('.pear-image-control'));assert([...W.document.querySelectorAll('.pear-image-control button')].some(x=>x.textContent==='停止'));
+let hits=0;W.fetch=async()=>{hits++;throw Error('mock network failure')};await u.generateDrawing().catch(e=>assert.match(e.message,/连接失败/));assert.equal(hits,1);assert.equal(u.getCounts().busy,false);
+W.__pear_nai_studio_v1.dispose();dom.window.close();console.log('PASS actual script startup, API loading, hung fetch stop, button recovery, zero queue/wait counters, progress cleanup, inline stop and no automatic retry');
+})().catch(e=>{console.error(e);process.exit(1)});

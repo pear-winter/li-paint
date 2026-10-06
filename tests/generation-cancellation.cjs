@@ -1,0 +1,23 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const source=JSON.parse(fs.readFileSync('downloads/pear-atelier-script-4.0.3.json','utf8')).content;
+let timers=[],wait=0,progressEnds=0,requests=0,saved=0;
+const scope={W:{AbortController,DOMException,setTimeout:(fn,ms)=>{const t={fn,ms};timers.push(t);return t;},clearTimeout:t=>{if(t)t.clear=true;}},dead:false,busy:false,controller:null,dbReady:Promise.resolve(),setWaiting:d=>wait+=d,notify:()=>{},endProgress:()=>progressEnds++,copy:structuredClone,startProgress:()=>{},decodeImages:async r=>r.images};
+vm.createContext(scope);vm.runInContext(source.slice(source.indexOf('let taskChain='),source.indexOf('function paintBusyState')),scope);
+vm.runInContext(source.slice(source.indexOf('async function sendGeneration('),source.indexOf('// Upscale')),scope);
+const tick=()=>new Promise(r=>setImmediate(r));
+(async()=>{
+ let release;const a=scope.run(task=>scope.awaitTask(task,()=>new Promise(r=>release=r))).catch(e=>e.name);
+ const b=scope.run(()=>{throw Error('queued task must not run')}).catch(e=>e.name);
+ await tick();scope.stopAll();assert.equal(await a,'AbortError');assert.equal(await b,'AbortError');assert.equal(wait,0);assert.equal(scope.busy,false);assert.equal(await scope.run(()=>42),42);
+ release('late');await tick();assert.equal(wait,0);
+ let oldResolve;scope.api=()=>{requests++;return new Promise(r=>oldResolve=r)};
+ const old=scope.run(async task=>{const images=await scope.sendGeneration({action:'generate'}, {},task);scope.checkTask(task);saved+=images.length;}).catch(e=>e.name);
+ await tick();scope.stopAll();assert.equal(await old,'AbortError');
+ scope.api=async()=>{requests++;return {images:['new']}};
+ await scope.run(async task=>{saved+=(await scope.sendGeneration({action:'generate'}, {},task)).length});
+ oldResolve({images:['old']});await tick();assert.equal(saved,1);assert.equal(requests,2);assert.equal(wait,0);
+ const timeout=scope.run(task=>scope.awaitTask(task,()=>new Promise(()=>{}))).catch(e=>e.message);await tick();timers.filter(t=>!t.clear).at(-1).fn();assert.match(await timeout,/3 分钟/);assert.equal(wait,0);assert.equal(await scope.run(()=>7),7);
+ let resolveBody;scope.api=async()=>({});scope.decodeImages=()=>new Promise(r=>resolveBody=r);
+ const body=scope.run(task=>scope.sendGeneration({action:'generate'},{},task)).catch(e=>e.name);await tick();scope.stopAll();assert.equal(await body,'AbortError');resolveBody(['late body']);await tick();assert.equal(wait,0);
+ console.log('PASS: hung task + queue cancellation, immediate restart, late response isolation, timeout recovery, body decode cancellation; no paid retries');
+})().catch(e=>{console.error(e);process.exit(1)});

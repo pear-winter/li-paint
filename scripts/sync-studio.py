@@ -8,13 +8,16 @@ def once(s,a,b):
 import runpy
 source=runpy.run_path(str(root/'scripts/runtime-patches.py'))['patch_runtime'](source,once)
 # Native extension: shared UI, settings namespace and database, no Tavern Helper required.
-ext=once(source,'(function startAtelier(){','export function startAtelier(getContext,uploadImage){')
+import json
+# Script 4.0.3 carries the cancellation fix; standalone stays on its released source.
+ext_source=json.loads((root/'downloads/pear-atelier-script-4.0.3.json').read_text())['content']
+ext=once(ext_source,'(function startAtelier(){','export function startAtelier(getContext,uploadImage){')
 ext=once(ext,'const W=window.parent||window,','const W=window,')
 ext=once(ext,'const ctx=()=>W.SillyTavern?.getContext();if(!ctx())return;','const ctx=getContext;if(!ctx())return;')
 # Use the host's image helper: endpoints and payloads changed between releases.
-a=ext.index("const response=await W.fetch('/api/images/upload'")
+a=ext.index("const response=await awaitTask(task,()=>W.fetch('/api/images/upload'")
 z=ext.index('if(!validSource(src))return;',a)
-ext=ext[:a]+"const result=await uploadImage(item,controller.signal);"+ext[z:]
+ext=ext[:a]+"const result=await awaitTask(task,()=>uploadImage(item,task.controller.signal));"+ext[z:]
 ext=once(ext,'cleanup.push(()=>ctx().eventSource.removeListener(event,fn));', 'cleanup.push(()=>{const bus=ctx().eventSource;const off=bus?.removeListener||bus?.off;off?.call(bus,event,fn);});')
 ext=once(ext,"let hostIsGenerating=null;import('/script.js')","let hostIsGenerating=null;import(new URL('script.js',D.baseURI).href)")
 ext=ext.removesuffix('\n')
@@ -62,4 +65,4 @@ const standaloneStyle=e('style');standaloneStyle.textContent='.shell{inset:0!imp
 W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'4.0.2',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
 s=s.replace('独立酒馆助手脚本 · SillyTavern 1.19 / 酒馆助手 4.10','独立画室 · 网页 / Android / Windows')
 (root/'dist/app.js').write_text(s)
-print('Generated studio 4.0.2: standalone and native extension')
+print('Generated standalone 4.0.2 and native extension 4.0.3')
