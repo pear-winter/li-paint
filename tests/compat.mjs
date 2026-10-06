@@ -36,6 +36,7 @@ for (const version of ['1.10.0','1.12.0','1.19.0']) {
 const item={id:'image1',image:'data:image/png;base64,iVBORw0KGgo='};let args;
 const upload=makeImageUploader(async(...a)=>{args=a;return 'user/images/pear-nai/image1.png';},'https://tavern.test/');
 assert.deepEqual(await upload(item),{path:'/user/images/pear-nai/image1.png'});assert.deepEqual(args,['iVBORw0KGgo=','pear-nai','image1','png']);
+await upload({id:'jpeg',image:'data:image/jpeg;base64,/9j/AA=='});assert.deepEqual(args,['/9j/AA==','pear-nai','jpeg','jpg']);
 assert.equal(normalizeImagePath('user/images/a.png','https://tavern.test/st/'),'/st/user/images/a.png');
 for(const path of ['https://other.test/a.png','//other.test/a.png','javascript:alert(1)','a\\b.png'])assert.throws(()=>normalizeImagePath(path,'https://tavern.test/'));
 await assert.rejects(upload(item,AbortSignal.abort()),e=>e.name==='AbortError');
@@ -60,3 +61,4 @@ for(const initiallyReady of [undefined,true,false]){
  assert.equal(starts,1);sandbox.onEnable();assert.equal(timers.size,0);sandbox.onDisable();assert.equal(disposed,1);assert.equal(current.eventSource.listenerCount('app_ready'),0);sandbox.onEnable();await tick();assert.equal(starts,2);sandbox.onDisable();
 }
 console.log('PASS host-owned uploads, safe paths, entry startup before/after ready and lifecycle');
+

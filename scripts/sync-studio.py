@@ -10,7 +10,7 @@ source=runpy.run_path(str(root/'scripts/runtime-patches.py'))['patch_runtime'](s
 # Native extension: shared UI, settings namespace and database, no Tavern Helper required.
 import json
 # Script 4.0.4 carries the cancellation fix; standalone stays on its released source.
-ext_source=json.loads((root/'downloads/pear-atelier-script-4.0.4.json').read_text())['content']
+ext_source=json.loads((root/'downloads/pear-atelier-script-4.0.5.json').read_text())['content']
 ext=once(ext_source,'(function startAtelier(){','export function startAtelier(getContext,uploadImage){')
 ext=once(ext,'const W=window.parent||window,','const W=window,')
 ext=once(ext,'const ctx=()=>W.SillyTavern?.getContext();if(!ctx())return;','const ctx=getContext;if(!ctx())return;')
@@ -62,7 +62,8 @@ start=s.index('W[OWNER]={dispose,open,inline:{');end=s.index(";window.addEventLi
 s=once(s,"W[OWNER]={dispose,open};", """function applyTavernColors(){for(const [key,value]of Object.entries(s.ui.tavernColors||{})){if(/^--SmartTheme[A-Za-z]+Color$/.test(key)&&typeof value==='string'&&W.CSS?.supports('color',value))host.style.setProperty(key,value);}}
 applyTavernColors();
 const standaloneStyle=e('style');standaloneStyle.textContent='.shell{inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border:0!important}.fab{display:none!important}';root.append(standaloneStyle);
-W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'4.0.2',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
+W[OWNER]={dispose,open};D.getElementById('startup')?.remove();W.PearApp={version:'4.0.5',back(){const dialogs=root.querySelectorAll('.modal');if(dialogs.length){dialogs[dialogs.length-1].remove();return true;}return false;}};open();""")
 s=s.replace('独立酒馆助手脚本 · SillyTavern 1.19 / 酒馆助手 4.10','独立画室 · 网页 / Android / Windows')
 (root/'dist/app.js').write_text(s)
-print('Generated standalone 4.0.2 and native extension 4.0.4')
+print('Generated standalone and native extension 4.0.5')
+

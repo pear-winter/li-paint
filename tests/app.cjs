@@ -33,7 +33,7 @@ const {JSDOM}=require(process.env.PEAR_TEST_MODULES?process.env.PEAR_TEST_MODULE
  console.log('PASS 3.11.1: unsaved image prompts stay inline, saved pairs reused, save-and-apply persists without duplicate prompts');
 
 
- assert.equal(W.PearApp.version,'4.0.2');
+ assert.equal(W.PearApp.version,'4.0.5');
  assert(!t.pages['设置'].textContent.includes('酒馆当前 API'));assert(!t.pages['设置'].textContent.includes('一键使用酒馆 API'));
  assert.equal(pair.params.model,t.cfg.model);t.applyPairParams(t.cfg,{params:{steps:32,scale:6}});assert.equal(t.cfg.steps,32);
  t.markPairBaseline();t.cfg.steps=33;t.closeShell();dialog=[...shadow.querySelectorAll('.dialog')].at(-1);assert(dialog.textContent.includes('参数有改动'));[...dialog.querySelectorAll('button')].find(x=>x.textContent==='存进当前画师串').click();assert.equal(pair.params.steps,33);assert.equal(shadow.querySelector('.shell').hidden,false);
@@ -54,3 +54,4 @@ const {JSDOM}=require(process.env.PEAR_TEST_MODULES?process.env.PEAR_TEST_MODULE
  console.log('PASS 4.0.2 progress: estimates, completion, failure/stop and timer cleanup');
  t.dispose();assert.equal(t.genProgress().active,false);assert.equal(t.genProgress().raf,0);dom.window.close();console.log('PASS standalone: startup, v2 migration, Vibe models, no automatic library writes, V5 cancellation, metadata edits/import/navigation, corners, original PNG fixtures');
 })().catch(e=>{console.error(e);process.exit(1)});
+

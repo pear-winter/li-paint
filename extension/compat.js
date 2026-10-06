@@ -28,7 +28,7 @@ export function makeImageUploader(saveBase64AsFile, base) {
         check();
         if (typeof saveBase64AsFile !== 'function') throw Error('当前酒馆缺少图片保存接口；图片仍保存在画室图库中。');
         // Host helper selects its own endpoint and data-URL/raw-base64 format.
-        const path = await saveBase64AsFile(item.image.split(',')[1], 'pear-nai', item.id, 'png');
+        const path = await saveBase64AsFile(item.image.split(',')[1], 'pear-nai', item.id, /^data:image\/jpeg[;,]/i.test(item.image) ? 'jpg' : 'png');
         check();
         return { path: normalizeImagePath(path, base) };
     };
@@ -43,3 +43,4 @@ export async function loadHostCompatibility(host = window, importer = url => imp
     const [core, extensions, utils] = modules.map(result => result.status === 'fulfilled' ? result.value : {});
     return { getContext: makeContextReader(host, core, extensions), uploadImage: makeImageUploader(utils.saveBase64AsFile, base) };
 }
+
