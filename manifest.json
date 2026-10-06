@@ -5,7 +5,7 @@
   "optional": [],
   "js": "extension/index.js",
   "author": "梨梨",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "homePage": "https://github.com/pear-winter/li-paint",
   "minimum_client_version": "1.10.0",
   "auto_update": false,

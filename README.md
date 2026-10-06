@@ -1,6 +1,15 @@
-# ♪ 梨梨画室 · 酒馆 4.0.3 / 独立版 4.0.2
+# ♪ 梨梨画室 · 酒馆 4.0.4 / 独立版 4.0.2
 
 同步梨梨的《♪ 梨梨画室 v4.0.1》脚本，包含独立 APK、网页、Windows EXE 与原生 SillyTavern 扩展。独立版保留绘图、元数据库、Vibe 库、图库、设置五页；酒馆扩展另外保留正文抓取、文生图配置和聊天插图按钮。
+
+## 酒馆脚本与插件 4.0.4
+
+[脚本 JSON](downloads/pear-atelier-script-4.0.4.json) · [插件 ZIP](downloads/lili-atelier-extension-4.0.4.zip)
+
+- 停止键只保留在画室主页，正文按钮恢复原来的布局。
+- 进度条在图片保存、正文上传（如需要）及显示解码就绪后才显示完成；超过估算时明确显示仍在等待图片。
+- “提高清晰度”改为“清晰”。点击弹出“确定消耗Anlas提高清晰度吗”，点确定才执行，取消不调用接口。
+- 沿用 4.0.3 的取消、队列及超时修复。脚本和插件只启用一种。
 
 ## 酒馆助手脚本 4.0.3 · 生图停止修复
 
@@ -73,7 +82,7 @@ APK、网页、EXE 和酒馆各自保存在本设备，彼此不自动同步。�
 
 ## 构建
 
-`src/studio.js` 是独立版 4.0.2 源码；`downloads/pear-atelier-script-4.0.3.json` 的 `content` 是脚本和扩展 4.0.3 的源码。`scripts/sync-studio.py` 分别生成独立版和原生扩展，保留原界面及主题。`scripts/runtime-patches.py` 对两个产物应用进度清理与 UUID 兼容修复；`extension/compat.js` 独立处理酒馆版本差异。
+`src/studio.js` 是独立版 4.0.2 源码；`downloads/pear-atelier-script-4.0.4.json` 的 `content` 是脚本和扩展 4.0.4 的源码。`scripts/sync-studio.py` 分别生成独立版和原生扩展，保留原界面及主题。`scripts/runtime-patches.py` 对两个产物应用进度清理与 UUID 兼容修复；`extension/compat.js` 独立处理酒馆版本差异。
 
 ```sh
 npm ci

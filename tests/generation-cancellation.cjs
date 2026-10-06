@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
-const source=JSON.parse(fs.readFileSync('downloads/pear-atelier-script-4.0.3.json','utf8')).content;
+const source=JSON.parse(fs.readFileSync('downloads/pear-atelier-script-4.0.4.json','utf8')).content;
 let timers=[],wait=0,progressEnds=0,requests=0,saved=0;
 const scope={W:{AbortController,DOMException,setTimeout:(fn,ms)=>{const t={fn,ms};timers.push(t);return t;},clearTimeout:t=>{if(t)t.clear=true;}},dead:false,busy:false,controller:null,dbReady:Promise.resolve(),setWaiting:d=>wait+=d,notify:()=>{},endProgress:()=>progressEnds++,copy:structuredClone,startProgress:()=>{},decodeImages:async r=>r.images};
 vm.createContext(scope);vm.runInContext(source.slice(source.indexOf('let taskChain='),source.indexOf('function paintBusyState')),scope);
